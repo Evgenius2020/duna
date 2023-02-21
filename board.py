@@ -31,17 +31,11 @@ class TurnCode:
         return f'{self.coord_from}{self.coord_to}'
 
 
-@dataclass
-class DirectionalOptions:
-    up: list[CellCoord] = field(default_factory=list)
-    right: list[CellCoord] = field(default_factory=list)
-    down: list[CellCoord] = field(default_factory=list)
-    left: list[CellCoord] = field(default_factory=list)
-
-
 class Board:
     field: list[list[CellState]]
-    king_cells: list[CellCoord]
+    board_size: int
+    center_cell: CellCoord
+    corner_cells: list[CellCoord]
     white_turn: bool = True
 
     def __init__(self):
@@ -83,44 +77,34 @@ class Board:
                     available_turns.extend(self.get_turns_for_figure(CellCoord(horizontal_coord, vertical_coord)))
         return available_turns
 
-    def _get_cells_until_collision(self, horizontal_coords, vertical_coords, forbidden_cells) -> list[CellCoord]:
-        result = []
-        for vertical_coord in vertical_coords:
-            for horizontal_coord in horizontal_coords:
-                probe_cell = CellCoord(vertical_coord, horizontal_coord)
-                if (self.get_field_cell_state(probe_cell.vertical, probe_cell.horizontal) != CellState.EMPTY) or \
-                        (probe_cell in forbidden_cells):
-                    return result
-                result.append(probe_cell)
-        return result
-
-    def _get_directional_options(self, from_cell: CellCoord) -> DirectionalOptions:
+    def get_turns_for_figure(self, from_cell: CellCoord) -> list[TurnCode]:
+        if self.get_field_cell_state(from_cell.vertical, from_cell.horizontal) == CellState.EMPTY:
+            return []
         forbidden_cells = [self.center_cell] + self.corner_cells if \
             self.get_field_cell_state(from_cell.vertical, from_cell.horizontal) != CellState.KING else []
-        return DirectionalOptions(
-            left=self._get_cells_until_collision(
-                horizontal_coords=range(from_cell.horizontal - 1, 0, -1),
-                vertical_coords=[from_cell.vertical],
-                forbidden_cells=forbidden_cells),
-            right=self._get_cells_until_collision(
-                horizontal_coords=range(from_cell.horizontal + 1, self.board_size + 1),
-                vertical_coords=[from_cell.vertical],
-                forbidden_cells=forbidden_cells),
-            up=self._get_cells_until_collision(
-                horizontal_coords=[from_cell.horizontal],
-                vertical_coords=range(from_cell.vertical + 1, self.board_size + 1),
-                forbidden_cells=forbidden_cells),
-            down=self._get_cells_until_collision(
-                horizontal_coords=[from_cell.horizontal],
-                vertical_coords=range(from_cell.vertical - 1, 0, -1),
-                forbidden_cells=forbidden_cells)
-        )
-
-    def get_turns_for_figure(self, current_cell: CellCoord) -> list[TurnCode]:
-        if self.get_field_cell_state(current_cell.vertical, current_cell.horizontal) == CellState.EMPTY:
-            return []
-        options = self._get_directional_options(current_cell)
-        return [TurnCode(current_cell, option) for option in (options.up + options.right + options.down + options.left)]
+        result = []
+        # В каждом из 4х направлений от центра движемся до момента пока не встретим препятствие.
+        for horizontal_coords, vertical_coords in \
+                ((range(from_cell.horizontal - 1, 0, -1), [from_cell.vertical]),
+                 (range(from_cell.horizontal + 1, self.board_size + 1), [from_cell.vertical]),
+                 ([from_cell.horizontal], range(from_cell.vertical + 1, self.board_size + 1)),
+                 ([from_cell.horizontal], range(from_cell.vertical - 1, 0, -1))):
+            # Собираем все свободные координаты.
+            possible_coords = []
+            searching_stopped = False
+            for vertical_coord in vertical_coords:
+                for horizontal_coord in horizontal_coords:
+                    probe_cell = CellCoord(vertical_coord, horizontal_coord)
+                    if (self.get_field_cell_state(probe_cell.vertical,
+                                                  probe_cell.horizontal) != CellState.EMPTY) or \
+                            (probe_cell in forbidden_cells):
+                        searching_stopped = True
+                        break
+                    possible_coords.append(TurnCode(from_cell, probe_cell))
+                if searching_stopped:
+                    break
+            result += possible_coords
+        return result
 
     def make_turn(self, turn_code: TurnCode):
         prev_coord = turn_code.coord_from
@@ -149,14 +133,14 @@ class Board:
                                    CellState.EMPTY)
 
         # Проверка соседей
-        for next_first, next_second in [(CellCoord(next_coord.vertical + 1, next_coord.horizontal),
+        for next_first, next_second in ((CellCoord(next_coord.vertical + 1, next_coord.horizontal),
                                          CellCoord(next_coord.vertical + 2, next_coord.horizontal)),
                                         (CellCoord(next_coord.vertical - 1, next_coord.horizontal),
                                          CellCoord(next_coord.vertical - 2, next_coord.horizontal)),
                                         (CellCoord(next_coord.vertical, next_coord.horizontal + 1),
                                          CellCoord(next_coord.vertical, next_coord.horizontal + 2)),
                                         (CellCoord(next_coord.vertical, next_coord.horizontal - 1),
-                                         CellCoord(next_coord.vertical, next_coord.horizontal + 2))]:
+                                         CellCoord(next_coord.vertical, next_coord.horizontal - 2))):
             # next_first должна быть вражеской, а стоящая за ней - союзной или специальной клеткой, тогда срубаем.
             if (self.get_field_cell_state(next_first.vertical, next_first.horizontal) in enemy_states) and \
                     ((self.get_field_cell_state(next_second.vertical, next_second.horizontal) in ally_states) or
