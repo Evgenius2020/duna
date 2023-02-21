@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Union
 
@@ -83,13 +83,13 @@ class Board:
         forbidden_cells = [self.center_cell] + self.corner_cells if \
             self.get_field_cell_state(from_cell.vertical, from_cell.horizontal) != CellState.KING else []
         result = []
-        # В каждом из 4х направлений от центра движемся до момента пока не встретим препятствие.
+        # Look all 4 directions from center until we hit an obstacle.
         for horizontal_coords, vertical_coords in \
                 ((range(from_cell.horizontal - 1, 0, -1), [from_cell.vertical]),
                  (range(from_cell.horizontal + 1, self.board_size + 1), [from_cell.vertical]),
                  ([from_cell.horizontal], range(from_cell.vertical + 1, self.board_size + 1)),
                  ([from_cell.horizontal], range(from_cell.vertical - 1, 0, -1))):
-            # Собираем все свободные координаты.
+            # Collect available cells to move at direction.
             possible_coords = []
             searching_stopped = False
             for vertical_coord in vertical_coords:
@@ -112,13 +112,13 @@ class Board:
         next_coord_state = self.get_field_cell_state(prev_coord.vertical,
                                                      prev_coord.horizontal)
 
-        # Определим свои и вражеские фигуры.
+        # Defines ally and enemy pieces.
         ally_and_enemy_states = [[CellState.BLACK, CellState.KING], [CellState.WHITE]]
         if next_coord_state == CellState.WHITE:
             ally_and_enemy_states = reversed(ally_and_enemy_states)
         ally_states, enemy_states = ally_and_enemy_states
 
-        # Двигать можно только свои фигуры в свой ход и на пустую клетку.
+        # You can move only your pieces; at your turn and only to empty cell.
         if (next_coord_state not in ally_states) or \
                 (next_coord_state == CellState.WHITE and self.white_turn) or \
                 (self.get_field_cell_state(next_coord.vertical,
@@ -132,7 +132,7 @@ class Board:
                                    prev_coord.horizontal,
                                    CellState.EMPTY)
 
-        # Проверка соседей
+        # Checking the attack of adjacent enemy pieces.
         for next_first, next_second in ((CellCoord(next_coord.vertical + 1, next_coord.horizontal),
                                          CellCoord(next_coord.vertical + 2, next_coord.horizontal)),
                                         (CellCoord(next_coord.vertical - 1, next_coord.horizontal),
@@ -141,10 +141,11 @@ class Board:
                                          CellCoord(next_coord.vertical, next_coord.horizontal + 2)),
                                         (CellCoord(next_coord.vertical, next_coord.horizontal - 1),
                                          CellCoord(next_coord.vertical, next_coord.horizontal - 2))):
-            # next_first должна быть вражеской, а стоящая за ней - союзной или специальной клеткой, тогда срубаем.
+            # next_first should be enemy, next to it - aly cell or central cell, or corned cell.
             if (self.get_field_cell_state(next_first.vertical, next_first.horizontal) in enemy_states) and \
                     ((self.get_field_cell_state(next_second.vertical, next_second.horizontal) in ally_states) or
                      next_second in [self.center_cell] + self.corner_cells):
+                # If so, next enemy piece can be removed.
                 self._set_field_cell_state(next_first.vertical,
                                            next_first.horizontal,
                                            CellState.EMPTY)
