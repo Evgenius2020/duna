@@ -1,0 +1,18 @@
+.board-cell {
+    margin: 1px;
+    width: 30px;
+    height: 30px;
+    background-color: lightgrey;
+}
+
+.board-cell.selected {
+    background-color: grey;
+}
+
+.board-cell:hover {
+    background-color: darkseagreen;
+}
+
+.board-cell.selected:hover {
+    background-color: darkgreen;
+}
