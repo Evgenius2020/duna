@@ -1,20 +1,20 @@
-import React, {useMemo} from 'react';
+import React, {FC, useMemo} from 'react';
 import {BoardCellProps} from "./types.ts";
 
 
-export default class BoardCell extends React.Component<BoardCellProps &
-    { onClick: () => void }> {
-
-    render() {
+const BoardCell: FC<BoardCellProps &
+    { onClick: () => void }> =
+    ({selected, onClick}) => {
         const className = useMemo(() => {
             let className = 'board-cell'
-            if (this.props.selected) {
+            if (selected) {
                 className = `${className} selected`
             }
             return className
-        }, [this.props.selected])
-        return <button
+        }, [selected])
+        return (<button
             className={className}
-            onClick={() => this.props.onClick()}/>;
-    };
-}
+            onClick={() => onClick()}/>);
+    }
+
+export default BoardCell
