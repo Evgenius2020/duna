@@ -1,9 +1,8 @@
 import React, {FC, useCallback, useState} from 'react';
-import Board from "./components/board";
+import Board from "./components/Board";
 import {BoardCellProps, BoardCells, Coord, Piece} from "./types";
 
-const Game:
-    FC = () => {
+const Game: FC = () => {
 
     const [cells, setCells] = useState<BoardCells>(
         Array.from({length: 13}).map(

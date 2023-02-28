@@ -1,6 +1,6 @@
 import React, {FC, useState} from 'react';
 
-import BoardCell from "./board_cell";
+import BoardCell from "./BoardCell";
 import {BoardCells, Coord} from "../types";
 
 const Board: FC<
