@@ -7,16 +7,16 @@ const BoardCell:
     ({selected, piece, onClick}) => {
 
         const className = useMemo(() => {
-            let className = 'board-cell'
+            let className = 'board-cell piece'
             if (selected) {
                 className = `${className} selected`
             }
-            if (piece == Piece.king) {
-                className = `${className} piece-king`
-            } else if (piece == Piece.black) {
-                className = `${className} piece-black`
-            } else if (piece == Piece.white) {
-                className = `${className} piece-white`
+            if (piece == Piece.King) {
+                className = `${className} king`
+            } else if (piece == Piece.Black) {
+                className = `${className} black`
+            } else if (piece == Piece.White) {
+                className = `${className} white`
             }
             return className
         }, [selected])

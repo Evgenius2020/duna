@@ -1,18 +1,35 @@
 import React, {FC, useCallback, useState} from 'react';
 import Board from "./components/Board";
-import {BoardCellProps, BoardCells, Coord, Piece} from "./types";
+import {
+    BoardCellProps,
+    BoardCells,
+    Coord,
+    GameStatusProps,
+    Piece,
+    TurnStatus
+} from "./types";
+import GameStatus from "./components/GameStatus";
 
 const Game: FC = () => {
 
-    const [cells, setCells] = useState<BoardCells>(
-        Array.from({length: 13}).map(
-            () => Array.from({length: 13}).map(
-                () => ({
-                    selected: false,
-                    piece: Piece.empty
-                }))
-        )
-    );
+    const [cells, setCells] =
+        useState<BoardCells>(() =>
+            Array.from({length: 13}).map(
+                () => Array.from({length: 13}).map(
+                    () => ({
+                        selected: false,
+                        piece: Piece.Empty
+                    })))
+        );
+
+    const [gameStatusProps, setGameStatusProps] =
+        useState<GameStatusProps>(() => {
+            return {
+                turnStatus: TurnStatus.Black,
+                blackLosses: 0,
+                whiteLosses: 0
+            }
+        });
 
     const changeCell = useCallback(
         (
@@ -43,15 +60,20 @@ const Game: FC = () => {
         console.log(coordFrom, coordTo);
     }
 
-    return (<Board
-        cells={cells}
-        changeCellSelected={(coord: Coord,
-                             selected: boolean) =>
-            changeCell(coord, {
-                ...cells[coord.vertical][coord.horizontal],
-                selected: selected,
-            })}
-        onTurnAttempt={onTurnAttempt}/>);
+    return (
+        <div className='game'>
+            <Board
+                cells={cells}
+                changeCellSelected={(coord: Coord,
+                                     selected: boolean) =>
+                    changeCell(coord, {
+                        ...cells[coord.vertical][coord.horizontal],
+                        selected: selected,
+                    })}
+                onTurnAttempt={onTurnAttempt}/>
+            <GameStatus
+                gameStatusProps={gameStatusProps}/>
+        </div>);
 }
 
 export default Game;

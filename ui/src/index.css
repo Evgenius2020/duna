@@ -1,7 +1,13 @@
+.game {
+    width: 100%;
+}
+
+.board {
+    display: inline-block;
+}
+
 .board-cell {
     margin: 1px;
-    width: 45px;
-    height: 45px;
     background-color: lightgrey;
 }
 
@@ -17,17 +23,36 @@
     background-color: darkgreen;
 }
 
-.piece-white {
+.piece {
+    width: 45px;
+    height: 45px;
+}
+
+.piece.white {
     background-image: url(
     'https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg');
 }
 
-.piece-black {
+.piece.black {
     background-image: url(
     'https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg');
 }
 
-.piece-king {
+.piece.king {
     background-image: url(
     'https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_pdt45.svg');
+}
+
+.game-status {
+    display: inline-block;
+    margin-left: 50px;
+    margin-top: 100px;
+    vertical-align: top;
+}
+
+.score-text {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 45px;
+    width: fit-content;
+    display: inline-block;
 }
