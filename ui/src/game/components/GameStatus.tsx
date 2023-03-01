@@ -1,5 +1,5 @@
 import {FC, useMemo} from "react";
-import {GameStatusProps, TurnStatus} from "../types";
+import {GameStatusProps} from "../types";
 
 const GameStatus: FC<
     {
@@ -7,10 +7,10 @@ const GameStatus: FC<
     }> = ({gameStatusProps}) => {
 
     const turnStatusText = useMemo(() => {
-        if (gameStatusProps.turnStatus == TurnStatus.White) {
-            return 'Ход белых'
+        if (gameStatusProps.side === gameStatusProps.turnStatus) {
+            return 'Ваш ход'
         } else {
-            return 'Ход черных'
+            return 'Ход оппонента'
         }
     }, [gameStatusProps]);
 
@@ -20,7 +20,7 @@ const GameStatus: FC<
                 {turnStatusText}
             </span>
 
-            <div className='meh'>
+            <div>
                 <div className='score-text'>
                     <div className='piece black'/>
                     <span>{gameStatusProps.blackLosses}</span>

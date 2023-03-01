@@ -19,7 +19,7 @@ const BoardCell:
                 className = `${className} white`
             }
             return className
-        }, [selected])
+        }, [selected, piece])
 
         return (<button
             className={className}

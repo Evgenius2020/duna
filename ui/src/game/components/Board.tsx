@@ -1,14 +1,13 @@
 import React, {FC, useState} from 'react';
 
 import BoardCell from "./BoardCell";
-import {BoardCells, Coord} from "../types";
+import {BoardCells, Coord, Turn} from "../types";
 
 const Board: FC<
     {
         cells: BoardCells,
         changeCellSelected: (coord: Coord, value: boolean) => void
-        onTurnAttempt: (coord_from: Coord,
-                        coord_to: Coord) => void
+        onTurnAttempt: (turn: Turn) => void
     }> = ({cells, changeCellSelected, onTurnAttempt}) => {
 
 
@@ -32,7 +31,10 @@ const Board: FC<
                 // Valid move.
                 changeCellSelected(lastSelection, false);
                 setLastSelection({...newSelection, initialized: false});
-                onTurnAttempt(lastSelection, newSelection);
+                onTurnAttempt({
+                    coordFrom: lastSelection,
+                    coordTo: newSelection
+                });
             } else {
                 // Invalid move (start from another cell).
                 changeCellSelected(lastSelection, false);

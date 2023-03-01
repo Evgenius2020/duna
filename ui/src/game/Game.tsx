@@ -1,14 +1,16 @@
-import React, {FC, useCallback, useState} from 'react';
+import React, {FC, useCallback, useMemo, useRef, useState} from 'react';
 import Board from "./components/Board";
 import {
     BoardCellProps,
     BoardCells,
-    Coord,
+    Coord, GameState,
     GameStatusProps,
     Piece,
-    TurnStatus
+    Side,
+    Turn
 } from "./types";
 import GameStatus from "./components/GameStatus";
+import {WsClient} from "./WsClient";
 
 const Game: FC = () => {
 
@@ -25,11 +27,19 @@ const Game: FC = () => {
     const [gameStatusProps, setGameStatusProps] =
         useState<GameStatusProps>(() => {
             return {
-                turnStatus: TurnStatus.Black,
+                turnStatus: Side.Black,
+                side: Side.Black,
                 blackLosses: 0,
                 whiteLosses: 0
             }
         });
+
+    const wsClient = useMemo(
+        () => new WsClient(
+            (gameState: GameState) => {
+                setGameStatusProps(gameState.gameStatus);
+                setCells(gameState.boardCells);
+            }), []);
 
     const changeCell = useCallback(
         (
@@ -47,17 +57,16 @@ const Game: FC = () => {
             });
         }, []);
 
-    const onTurnAttempt = (coordFrom: Coord,
-                           coordTo: Coord) => {
-        coordFrom = {
-            vertical: 12 - coordFrom.vertical + 1,
-            horizontal: coordFrom.horizontal + 1,
+    const onTurnAttempt = (turn: Turn) => {
+        turn.coordFrom = {
+            vertical: 12 - turn.coordFrom.vertical + 1,
+            horizontal: turn.coordFrom.horizontal + 1,
         }
-        coordTo = {
-            vertical: 12 - coordTo.vertical + 1,
-            horizontal: coordTo.horizontal + 1,
+        turn.coordTo = {
+            vertical: 12 - turn.coordTo.vertical + 1,
+            horizontal: turn.coordTo.horizontal + 1,
         };
-        console.log(coordFrom, coordTo);
+        wsClient.sendTurn(turn);
     }
 
     return (

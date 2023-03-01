@@ -5,13 +5,17 @@ export enum Piece {
     Empty = ''
 }
 
-
 export type Coord = {
     vertical: number;
     horizontal: number;
 }
 
-export enum TurnStatus {
+export type Turn = {
+    coordFrom: Coord,
+    coordTo: Coord
+}
+
+export enum Side {
     Black = 'black',
     White = 'white'
 }
@@ -24,7 +28,13 @@ export type BoardCellProps = {
 export type BoardCells = BoardCellProps[][];
 
 export type GameStatusProps = {
-    turnStatus: TurnStatus,
+    side: Side
+    turnStatus: Side,
     blackLosses: number,
     whiteLosses: number
 }
+
+export type GameState = {
+    gameStatus: GameStatusProps,
+    boardCells: BoardCells
+};
