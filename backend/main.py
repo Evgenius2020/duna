@@ -3,7 +3,8 @@ import json
 
 import websockets
 
-from board import Board, TurnCode, CellCoord
+from board import Board
+from data_types import CellCoord, TurnCode
 
 board = Board()
 
@@ -14,14 +15,13 @@ def pack_game_state():
         'gameState': {
             'boardCells': [
                 [{
-                    'selected': False,
                     'piece': board.get_field_cell_state(v, h).value
                 } for h in range(1, 14)]
                 for v in range(13, 0, -1)
             ],
             'gameStatus': {
                 'side': 'black',
-                'turnStatus': 'black',
+                'turnStatus': 'white' if board.white_turn else 'black',
                 'blackLosses': 0,
                 'whiteLosses': 0
             }}

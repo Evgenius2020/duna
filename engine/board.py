@@ -1,34 +1,7 @@
-from dataclasses import dataclass
-from enum import Enum
+from copy import copy
 from typing import Union
 
-
-class CellState(Enum):
-    EMPTY = ' '
-    WHITE = 'w'
-    BLACK = 'b'
-    KING = 'k'
-
-    def __str__(self):
-        return self.value
-
-
-@dataclass
-class CellCoord:
-    vertical: int
-    horizontal: int
-
-    def __str__(self):
-        return f'{self.vertical:x}{self.horizontal:x}'
-
-
-@dataclass
-class TurnCode:
-    coord_from: CellCoord
-    coord_to: CellCoord
-
-    def __str__(self):
-        return f'{self.coord_from}{self.coord_to}'
+from data_types import CellState, CellCoord, TurnCode
 
 
 class Board:
@@ -36,7 +9,7 @@ class Board:
     board_size: int
     center_cell: CellCoord
     corner_cells: list[CellCoord]
-    white_turn: bool = True
+    white_turn: bool = False
 
     def __init__(self):
         self.field = list(map(lambda s: list(map(CellState, s)), [
@@ -54,12 +27,16 @@ class Board:
             '     w w     ',
             '    wwwww    ']))
         self.board_size = len(self.field)
+        # King start position.
         self.center_cell = CellCoord(self.board_size // 2 + 1,
                                      self.board_size // 2 + 1)
+        # King destination points.
         self.corner_cells = [CellCoord(1, 1),
                              CellCoord(self.board_size, 1),
                              CellCoord(1, self.board_size),
                              CellCoord(self.board_size, self.board_size)]
+        # Center (when empty) and corner cells can be used for attacking.
+        self.special_cells = copy(self.corner_cells)
 
     def get_field_cell_state(self,
                              vertical: int,
@@ -92,13 +69,16 @@ class Board:
         if self.get_field_cell_state(from_cell.vertical,
                                      from_cell.horizontal) == CellState.EMPTY:
             return []
+        # You can't move to center cell. Only king can go to corner cells.
         forbidden_cells = \
-            [self.center_cell] + \
-            self.corner_cells if self.get_field_cell_state(
-                from_cell.vertical,
-                from_cell.horizontal) != CellState.KING else []
+            [self.center_cell] + (
+                self.corner_cells if self.get_field_cell_state(
+                    from_cell.vertical,
+                    from_cell.horizontal) != CellState.KING else [])
         result = []
         # Look all 4 directions from center until we hit an obstacle.
+        # TODO: Make it simple:
+        #  look at ([H] * [V] - current_pos) + check not obstacle method.
         for horizontal_coords, vertical_coords in \
                 ((range(from_cell.horizontal - 1, 0, -1),
                   [from_cell.vertical]),
@@ -135,17 +115,15 @@ class Board:
         next_coord = turn_code.coord_to
         next_coord_state = self.get_field_cell_state(prev_coord.vertical,
                                                      prev_coord.horizontal)
-
         # Defines ally and enemy pieces.
         ally_and_enemy_states = [[CellState.BLACK, CellState.KING],
                                  [CellState.WHITE]]
-        if next_coord_state == CellState.WHITE:
+        if self.white_turn:
             ally_and_enemy_states = reversed(ally_and_enemy_states)
         ally_states, enemy_states = ally_and_enemy_states
 
-        # You can move only your pieces; at your turn and only to empty cell.
+        # You can move only your pieces and only to empty cell.
         if (next_coord_state not in ally_states) or \
-                (next_coord_state == CellState.WHITE and self.white_turn) or \
                 (self.get_field_cell_state(
                     next_coord.vertical,
                     next_coord.horizontal) != CellState.EMPTY):
@@ -164,7 +142,7 @@ class Board:
                                    CellState.EMPTY)
 
         # Checking the attack of adjacent enemy pieces.
-        for next_first, next_second in \
+        for next_first_cell, next_second_cell in \
                 ((CellCoord(next_coord.vertical + 1, next_coord.horizontal),
                   CellCoord(next_coord.vertical + 2, next_coord.horizontal)),
                  (CellCoord(next_coord.vertical - 1, next_coord.horizontal),
@@ -173,20 +151,28 @@ class Board:
                   CellCoord(next_coord.vertical, next_coord.horizontal + 2)),
                  (CellCoord(next_coord.vertical, next_coord.horizontal - 1),
                   CellCoord(next_coord.vertical, next_coord.horizontal - 2))):
-            # next_first should be enemy,
-            # next to it - aly cell or central cell, or corned cell.
-            if (self.get_field_cell_state(
-                    next_first.vertical,
-                    next_first.horizontal) in enemy_states) \
-                    and (
-                    (self.get_field_cell_state(
-                        next_second.vertical,
-                        next_second.horizontal) in ally_states) or
-                    (next_second in [self.center_cell] + self.corner_cells)):
-                # If so, next enemy piece can be removed.
-                self._set_field_cell_state(next_first.vertical,
-                                           next_first.horizontal,
+            # next_first_cell should be enemy,
+            # next to it (in a row) - ally or special cell.
+            next_first_cell_state = self.get_field_cell_state(
+                next_first_cell.vertical,
+                next_first_cell.horizontal)
+            next_second_cell_state = self.get_field_cell_state(
+                next_second_cell.vertical,
+                next_second_cell.horizontal)
+            if (next_first_cell_state in enemy_states) and \
+                    ((next_second_cell_state in ally_states) or
+                     (next_second_cell in self.special_cells)):
+                if next_first_cell_state == CellState.KING:
+                    # You can't kill king, only surround him :0
+                    continue
+                # If OK, enemy piece at next_first_cell can be removed.
+                self._set_field_cell_state(next_first_cell.vertical,
+                                           next_first_cell.horizontal,
                                            CellState.EMPTY)
+
+        if turn_code.coord_from == self.center_cell:
+            # When center cell is free, it can be used for attacking.
+            self.special_cells.append(self.center_cell)
 
         self.white_turn = not self.white_turn
 
@@ -197,3 +183,4 @@ if __name__ == '__main__':
     b = Board()
     at = b.get_available_turns()
     print(CellCoord(1, 12))
+    print(list(reversed([[c.value for c in row] for row in b.field])))
