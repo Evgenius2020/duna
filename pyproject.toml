@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "duna"
+version = "0.1.0"
+description = ""
+authors = ["evgenius2020 <zavarzinevg@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+sqlalchemy = "^2.0.5.post1"
+websockets = "^10.4"
+psycopg2 = "^2.9.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
