@@ -9,12 +9,14 @@ from sqlalchemy.orm import (Session, declarative_base, mapped_column,
                             relationship)
 
 Base = declarative_base()
+engine = create_engine(os.getenv('db_url'))
 
 
 class User(Base):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
-    name = Column(String(30), nullable=False)
+    name = Column(String(30), nullable=False, unique=True)
+    is_bot = Column(Boolean, nullable=False, default=False)
 
 
 class GameStatus(enum.Enum):
@@ -48,14 +50,15 @@ class Game(Base):
 
 
 if __name__ == '__main__':
-    engine = create_engine(os.getenv('dburl'))
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+    # Base.metadata.drop_all(engine)
+    # Base.metadata.create_all(engine)
     sess = Session(engine)
-    user1 = User(name='user1')
-    user2 = User(name='user2')
-    game1 = Game(host=user1,
-                 guest=user2,
-                 host_played_first=True)
-    sess.add_all([user1, user2, game1])
+    # user1 = User(name='user1')
+    # user2 = User(name='user2')
+    user1 = sess.query(User).filter(User.name == 'user1').first()
+    user2 = sess.query(User).filter(User.name == 'user2').first()
+    game = Game(host=user1,
+                guest=user2,
+                host_played_first=False)
+    sess.add_all([user1, user2, game])
     sess.commit()
