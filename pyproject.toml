@@ -12,6 +12,9 @@ websockets = "^10.4"
 psycopg2 = "^2.9.5"
 
 
+[tool.poetry.group.dev.dependencies]
+alembic = "^1.10.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
