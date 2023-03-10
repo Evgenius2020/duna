@@ -9,6 +9,7 @@ from sqlalchemy.orm import (Session, declarative_base, mapped_column,
                             relationship)
 
 Base = declarative_base()
+# TODO: aiopg, asyncpgsa - async engines.
 engine = create_engine(os.getenv('db_url'))
 
 
