@@ -11,6 +11,12 @@ class Board:
     corner_cells: list[CellCoord]
     white_turn: bool = False
 
+    def __repr__(self) -> str:
+        return ''.join(map(lambda row: ''.join(map(str, row)), self.field))
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
     def __init__(self):
         self.field = list(map(lambda s: list(map(CellState, s)), [
             '    wwwww    ',
@@ -183,4 +189,4 @@ if __name__ == '__main__':
     b = Board()
     at = b.get_available_turns()
     print(CellCoord(1, 12))
-    print(list(reversed([[c.value for c in row] for row in b.field])))
+    print(b)

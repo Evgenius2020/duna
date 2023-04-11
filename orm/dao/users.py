@@ -1,16 +1,10 @@
+from dataclasses import asdict
 from typing import Union
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from tables import User, engine, Base
-
-
-def convert_insert_result_to_object(obj,
-                                    target_type: Base) -> Base:
-    fields = obj.__dict__
-    del fields['_sa_instance_state']
-    return target_type(**fields)
+from tables import User, engine
 
 
 class UsersDAO:
@@ -21,12 +15,12 @@ class UsersDAO:
             try:
                 sess.add(user)
                 sess.commit()
-            except IntegrityError as e:
+            except IntegrityError:
                 # When user.name is not unique:
                 return None
-            return convert_insert_result_to_object(user, User)
+            return User(**asdict(user))
 
 
 if __name__ == '__main__':
-    u = UsersDAO.register('u5')
+    u = UsersDAO.register('u7')
     print(u)
