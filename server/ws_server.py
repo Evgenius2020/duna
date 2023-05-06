@@ -14,17 +14,19 @@ def pack_game_state():
         'type': 'SendGameState',
         'gameState': {
             'boardCells': [
-                [{
-                    'piece': board.get_field_cell_state(v, h).value
-                } for h in range(1, 14)]
+                [
+                    {'piece': board.get_field_cell_state(v, h).value}
+                    for h in range(1, 14)
+                ]
                 for v in range(13, 0, -1)
             ],
             'gameStatus': {
                 'side': 'black',
                 'turnStatus': 'white' if board.white_turn else 'black',
                 'blackLosses': 0,
-                'whiteLosses': 0
-            }}
+                'whiteLosses': 0,
+            },
+        },
     }
 
 
@@ -35,8 +37,10 @@ async def serve(websocket):
             await websocket.send(json.dumps(pack_game_state()))
         elif message['type'] == 'SendTurn':
             turn = message['turn']
-            turn = TurnCode(coord_from=CellCoord(**turn['coordFrom']),
-                            coord_to=CellCoord(**turn['coordTo']))
+            turn = TurnCode(
+                coord_from=CellCoord(**turn['coordFrom']),
+                coord_to=CellCoord(**turn['coordTo']),
+            )
             if board.make_turn(turn):
                 await websocket.send(json.dumps(pack_game_state()))
 

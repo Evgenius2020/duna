@@ -3,9 +3,19 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import (Boolean, Column, DateTime, Enum, ForeignKey, Integer,
-                        MetaData, String, Table, create_engine)
-from sqlalchemy.orm import (Session, registry)
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    MetaData,
+    String,
+    Table,
+    create_engine,
+)
+from sqlalchemy.orm import Session, registry
 
 metadata = MetaData()
 # TODO: aiopg, asyncpgsa - async engines.
@@ -13,8 +23,8 @@ engine = create_engine(os.getenv('db_url'))
 
 
 class GameStatus(enum.Enum):
-    unfinished = 0,
-    host_win = 1,
+    unfinished = 0
+    host_win = 1
     guest_win = 2
 
 
@@ -44,13 +54,16 @@ class Game:
 
 
 mapper_registry = registry(metadata=metadata)
-mapper_registry.map_imperatively(User, Table(
-    'user',
-    metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String(30), nullable=False, unique=True),
-    Column('is_bot', Boolean, nullable=False, default=False)
-))
+mapper_registry.map_imperatively(
+    User,
+    Table(
+        'user',
+        metadata,
+        Column('id', Integer, primary_key=True),
+        Column('name', String(30), nullable=False, unique=True),
+        Column('is_bot', Boolean, nullable=False, default=False),
+    ),
+)
 mapper_registry.map_imperatively(
     Game,
     Table(
@@ -65,7 +78,7 @@ mapper_registry.map_imperatively(
         Column('history', String, nullable=False),
         Column('host_current_turn', Boolean, nullable=False),
         Column('result', Enum(GameStatus), nullable=False),
-    )
+    ),
 )
 
 if __name__ == '__main__':

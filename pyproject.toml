@@ -14,15 +14,16 @@ psycopg2 = "^2.9.5"
 
 [tool.poetry.group.dev.dependencies]
 alembic = "^1.10.1"
+flake8 = "^6.0.0"
+black = "^23.3.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.yapf]
-based_on_style = "pep8"
-spaces_before_comment = 4
-column_limit = 80
+[tool.black]
+line-length = 80
+skip-string-normalization = true
 
-[tool.flake8]
-max-line-length = 50
+[flake8]
+max-line-length = 81

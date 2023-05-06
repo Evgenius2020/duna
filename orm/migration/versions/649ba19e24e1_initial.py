@@ -1,7 +1,7 @@
 """initial
 
 Revision ID: 649ba19e24e1
-Revises: 
+Revises:
 Create Date: 2023-03-08 23:56:14.361825
 
 """
@@ -21,29 +21,32 @@ def upgrade() -> None:
         'user',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=30), nullable=False),
-        sa.PrimaryKeyConstraint('id')
+        sa.PrimaryKeyConstraint('id'),
     )
     op.create_table(
         'game',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('host_id', sa.Integer(), nullable=False),
         sa.Column('guest_id', sa.Integer(), nullable=False),
-        sa.Column('host_played_first', sa.Boolean(),
-                  nullable=False),
-        sa.Column('started_at', sa.DateTime(timezone=True),
-                  nullable=True),
-        sa.Column('finished_at', sa.DateTime(timezone=True),
-                  nullable=True),
-        sa.Column('board_state', sa.String(length=169),
-                  nullable=True),
+        sa.Column('host_played_first', sa.Boolean(), nullable=False),
+        sa.Column('started_at', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('finished_at', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('board_state', sa.String(length=169), nullable=True),
         sa.Column('host_current_turn', sa.Boolean(), nullable=True),
         sa.Column('history', sa.String(), nullable=True),
-        sa.Column('result',
-                  sa.Enum('unfinished', 'host_win', 'guest_win',
-                          name='gamestatus'), nullable=True),
-        sa.ForeignKeyConstraint(['guest_id'], ['user.id'], ),
-        sa.ForeignKeyConstraint(['host_id'], ['user.id'], ),
-        sa.PrimaryKeyConstraint('id')
+        sa.Column(
+            'result',
+            sa.Enum('unfinished', 'host_win', 'guest_win', name='gamestatus'), nullable=True,
+        ),
+        sa.ForeignKeyConstraint(
+            ['guest_id'],
+            ['user.id'],
+        ),
+        sa.ForeignKeyConstraint(
+            ['host_id'],
+            ['user.id'],
+        ),
+        sa.PrimaryKeyConstraint('id'),
     )
     # ### end Alembic commands ###
 
