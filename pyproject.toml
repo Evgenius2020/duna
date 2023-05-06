@@ -18,3 +18,11 @@ alembic = "^1.10.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.yapf]
+based_on_style = "pep8"
+spaces_before_comment = 4
+column_limit = 80
+
+[tool.flake8]
+max-line-length = 50
