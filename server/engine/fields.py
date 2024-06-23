@@ -1,0 +1,15 @@
+default13x13 = [
+    '    wwwww    ',
+    '     w w     ',
+    '      w      ',
+    '      b      ',
+    'w   b   b   w',
+    'ww   bbb   ww',
+    'w wb bkb bw w',
+    'ww   bbb   ww',
+    'w   b   b   w',
+    '      b      ',
+    '      w      ',
+    '     w w     ',
+    '    wwwww    ',
+]
