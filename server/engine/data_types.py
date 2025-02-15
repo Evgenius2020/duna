@@ -13,8 +13,8 @@ class CellState(Enum):
 
 
 class GameState(Enum):
-    PLAYING = ('p',)
-    WHITE_WIN = ('w',)
+    PLAYING = 'p'
+    WHITE_WIN = 'w'
     BLACK_WIN = 'b'
 
 
@@ -44,4 +44,11 @@ class TurnCode:
     def __eq__(self, other):
         return (self.coord_from == other.coord_from) and (
             self.coord_to == other.coord_to
+        )
+
+    @staticmethod
+    def from_str(s) -> 'TurnCode':
+        return TurnCode(
+            CellCoordinates(vertical=int(s[0], 16), horizontal=int(s[1], 16)),
+            CellCoordinates(vertical=int(s[2], 16), horizontal=int(s[3], 16))
         )
