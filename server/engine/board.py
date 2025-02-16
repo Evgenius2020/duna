@@ -1,7 +1,7 @@
 from copy import copy
 from typing import Union
 
-from data_types import CellState, CellCoordinates, TurnCode
+from engine.data_types import CellState, CellCoordinates, TurnCode
 from engine.fields import default13x13
 
 

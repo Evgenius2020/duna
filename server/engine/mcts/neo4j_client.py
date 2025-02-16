@@ -12,21 +12,26 @@ class Neo4jClient:
     def close(self):
         self.driver.close()
 
-    def create_node(self, board: Board, parent_id=None, edge_name=None):
+    def create_node_or_get_exists(
+        self, board: Board, parent_id=None, edge_name=None
+    ):
+        if node_id := self.find_node_by_board(board):
+            return node_id
         with self.driver.session() as session:
-            result = session.execute_write(
+            node_id = session.execute_write(
                 queries.create_node_query,
                 str(board),
+                board.white_turn,
                 str(estimate_board(board)),
                 parent_id,
                 edge_name,
             )
-            return result
+            return node_id
 
     def find_node_by_board(self, board: Board):
         with self.driver.session() as session:
             result = session.execute_read(
-                queries.find_node_by_board_query, str(board)
+                queries.find_node_by_board_query, str(board), board.white_turn
             )
             return result
 
@@ -40,19 +45,14 @@ class Neo4jClient:
                 visits,
             )
 
-    def get_children(self, node_id):
-        with self.driver.session() as session:
-            result = session.execute_read(queries.get_children_query, node_id)
-            return result
-
     def get_parent(self, node_id):
         with self.driver.session() as session:
             result = session.execute_read(queries.get_parent_query, node_id)
             return result
 
-    def get_best_move(self, root_id, is_white_turn):
+    def get_best_move(self, board: Board):
         with self.driver.session() as session:
             result = session.execute_read(
-                queries.get_best_move_query, root_id, is_white_turn
+                queries.get_best_move_query, str(board), board.white_turn
             )
             return result

@@ -1,9 +1,9 @@
 import random
 from copy import deepcopy
+from typing import Callable
 
 from engine.board import Board
 from engine.board_estimation import (
-    estimate_board,
     EstimationResult,
     check_game_state,
 )
@@ -43,13 +43,17 @@ def _value_function(
     )
 
 
-def evaluate_best_move(board: Board) -> TurnCode:
+def evaluate_best_move(
+    board: Board, estimate_board_func: Callable[[Board], EstimationResult]
+) -> TurnCode:
     board_estimations = {}
     available_turns = board.get_available_turns()
     available_turns = random.sample(
         available_turns,
         min(BEST_MOVE_SELECTION_CANDIDATES, len(available_turns)),
     )
+
+    # Simulate all selected turns, save their estimated values
     for turn in available_turns:
         probe_board = deepcopy(board)
         if not probe_board.make_turn(turn):
@@ -62,11 +66,12 @@ def evaluate_best_move(board: Board) -> TurnCode:
             value_function_coefficients = BLACK_VALUE_FUNCTION_COEFFICIENTS
         board_estimations[turn] = (
             _value_function(
-                estimate_board(probe_board), value_function_coefficients
+                estimate_board_func(probe_board), value_function_coefficients
             )
             + white_win * (WIN_VALUE if board.white_turn else -WIN_VALUE)
             + black_win * (-WIN_VALUE if board.white_turn else WIN_VALUE)
         )
+
     best_turn_value = max(
         estimation for turn, estimation in board_estimations.items()
     )
