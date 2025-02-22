@@ -1,7 +1,7 @@
 from engine.board import Board
 from engine.board_estimation import check_game_state
 from engine.data_types import GameState
-from engine.mcts.constants import ITERATIONS_PER_MOVE, TURN_COUNT
+from engine.mcts.constants import TURN_COUNT
 from engine.mcts.mcts import MCTS
 from engine.mcts.neo4j_client import Neo4jClient
 import os
@@ -22,7 +22,7 @@ if __name__ == "__main__":
             break
 
         mcts = MCTS(neo4j_client)
-        best_move = mcts.run(board, iterations_per_move=ITERATIONS_PER_MOVE)
+        best_move = mcts.run(board)
         board.make_turn(best_move)
 
         print(

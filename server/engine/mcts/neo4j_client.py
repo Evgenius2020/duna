@@ -2,7 +2,7 @@ from neo4j import GraphDatabase
 
 from engine.board import Board
 from engine.board_estimation import estimate_board
-import neo4j_queries as queries
+from engine.mcts import neo4j_queries as queries
 
 
 class Neo4jClient:

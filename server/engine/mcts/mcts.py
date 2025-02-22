@@ -6,7 +6,7 @@ from engine.board import Board
 from engine.board_estimation import check_game_state, estimate_board
 from engine.data_types import GameState, TurnCode
 from engine.mcts.board_estimation_cache import InMemoryCache
-from engine.mcts.constants import MAX_SIMULATION_DEPTH
+from engine.mcts.constants import MAX_SIMULATION_DEPTH, ITERATIONS_PER_MOVE
 from engine.mcts.evaluate_best_move import evaluate_best_move
 from engine.mcts.neo4j_client import Neo4jClient
 
@@ -36,6 +36,14 @@ class MCTS:
             )
         return node_id, check_game_state(board)
 
+    def manual_move(self, board: Board, turn: TurnCode):
+        current_node_id = self.neo4j_client.find_node_by_board(board)
+        board.make_turn(turn)
+        next_node_id = self.neo4j_client.create_node_or_get_exists(
+            board, parent_id=current_node_id, edge_name=str(turn)
+        )
+        self.backpropagate(next_node_id, estimate_board(board))
+
     def backpropagate(self, node_id, result: GameState):
         white_wins = 1 if result == GameState.WHITE_WIN else 0
         black_wins = 1 if result == GameState.BLACK_WIN else 0
@@ -45,9 +53,9 @@ class MCTS:
             )
             node_id = self.neo4j_client.get_parent(node_id)
 
-    def run(self, board: Board, iterations_per_move: int):
+    def run(self, board: Board) -> TurnCode:
         # Each iteration, create 'iterations_per_move' random simulations
-        for _ in tqdm(range(iterations_per_move)):
+        for _ in tqdm(range(ITERATIONS_PER_MOVE)):
             # Selection
             root_id = self.neo4j_client.create_node_or_get_exists(board)
 

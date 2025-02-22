@@ -106,14 +106,10 @@ def get_best_move_query(tx, board: str, white_turn: bool):
         RETURN 
             r.turn_code AS turn_code,
             CASE 
-                WHEN child.visits = 0 THEN -1.0/0.0
-                ELSE child.visits 
-            END AS visits,
-            CASE 
                 WHEN $white_turn THEN child.white_wins 
                 ELSE child.black_wins 
             END AS wins
-        ORDER BY wins/visits DESC
+        ORDER BY wins DESC
         LIMIT 1
         """
     result = tx.run(query, board=board, white_turn=white_turn)
